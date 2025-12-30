@@ -11,6 +11,7 @@ import { UserLoginDto } from './dto/user-login.dto.js';
 import { User } from './user.entity.js';
 import { UserRegisterDto } from './dto/user-register.dto.js';
 import { IUserService } from './user.service.interface.js';
+import { ValidateMiddleware } from '../common/validate.middleware.js';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
@@ -21,7 +22,12 @@ export class UserController extends BaseController implements IUserController {
 		super(loggerService);
 		this.bindRoutes([
 			{ path: '/login', method: 'post', func: this.login },
-			{ path: '/register', method: 'post', func: this.register },
+			{
+				path: '/register',
+				method: 'post',
+				func: this.register,
+				middlewares: [new ValidateMiddleware(UserRegisterDto)],
+			},
 		]);
 	}
 
@@ -35,10 +41,10 @@ export class UserController extends BaseController implements IUserController {
 		res: Response,
 		next: NextFunction,
 	): Promise<void> {
-		const result = await this.userService.createUser(body)
-		if(!result) {
-			return next(new HTTPError(422, 'Такой пользователь уже существует' ))
+		const result = await this.userService.createUser(body);
+		if (!result) {
+			return next(new HTTPError(422, 'Такой пользователь уже существует'));
 		}
-		this.ok(res, { email: result.email});
+		this.ok(res, { email: result.email });
 	}
 }
