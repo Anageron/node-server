@@ -17,7 +17,7 @@ export class ConfigService implements IConfigService {
         }
     }
 
-    get<T extends string>(key: string): string {
+    get(key: string): string {
         return this.config[key]
     };
 }

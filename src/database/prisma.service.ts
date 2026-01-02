@@ -11,8 +11,8 @@ export class PrismaService {
 
 	constructor(@inject(TYPES.ILogger) private logger: ILogger) {
 
-		const dbPath = join(process.cwd(), 'prisma', 'dev_qa.db');
-		const dbUrl = `file:${dbPath.replace(/\\/g, '/')}`;
+		const dbPath = join(process.cwd(), 'dev.db')
+		const dbUrl = `file:${dbPath.replace(/\\/g, '/')}`
 		const adapter = new PrismaBetterSqlite3({
 			url: dbUrl,
 		});
