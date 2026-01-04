@@ -10,6 +10,7 @@ import { IConfigService } from './config/config.service.interface.js';
 import { IUserController } from './users/user.controller.interface.js';
 import { IExceptionFilter } from './errors/exception.filter.interface.js';
 import { PrismaService } from './database/prisma.service.js';
+import { AuthMiddleware } from './common/auth.middleware.js';
 
 @injectable()
 export class App {
@@ -21,7 +22,7 @@ export class App {
 		@inject(TYPES.ILogger) private logger: ILogger,
 		@inject(TYPES.IUserController) private userController: UserController,
 		@inject(TYPES.ExceptionFilter) private exceptionFilter: IExceptionFilter,
-		@inject(TYPES.ConfigService) private ConfigService: IConfigService,
+		@inject(TYPES.ConfigService) private configService: IConfigService,
 		@inject(TYPES.PrismaService) private prismaService: PrismaService,
 	) {
 		this.app = express();
@@ -30,6 +31,8 @@ export class App {
 
 	useMiddleware(): void {
 		this.app.use(express.json());
+		const authMiddleware = new AuthMiddleware(this.configService.get('SECRET'))
+		this.app.use(authMiddleware.execute.bind(authMiddleware))
 	}
 
 	useRoutes(): void {
