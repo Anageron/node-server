@@ -6,6 +6,7 @@ import { ILogger } from './logger/logger.interface.js';
 import { inject, injectable } from 'inversify';
 import { TYPES } from './types.js';
 import 'reflect-metadata';
+import cors from 'cors';
 import { IConfigService } from './config/config.service.interface.js';
 import { IUserController } from './users/user.controller.interface.js';
 import { IExceptionFilter } from './errors/exception.filter.interface.js';
@@ -29,10 +30,19 @@ export class App {
 		this.port = 8000;
 	}
 
+	useCors(): void {
+		this.app.use(
+			cors({
+				origin: 'http://localhost:5173', 
+				credentials: true, 
+			}),
+		);
+	}
+
 	useMiddleware(): void {
 		this.app.use(express.json());
-		const authMiddleware = new AuthMiddleware(this.configService.get('SECRET'))
-		this.app.use(authMiddleware.execute.bind(authMiddleware))
+		const authMiddleware = new AuthMiddleware(this.configService.get('SECRET'));
+		this.app.use(authMiddleware.execute.bind(authMiddleware));
 	}
 
 	useRoutes(): void {
@@ -44,10 +54,11 @@ export class App {
 	}
 
 	public async init(): Promise<void> {
+		this.useCors();
 		this.useMiddleware();
 		this.useRoutes();
 		this.useExeptionFilters();
-		await this.prismaService.connect()
+		await this.prismaService.connect();
 		this.server = this.app.listen(this.port);
 		this.logger.log(`Сервер запущен на http://localhost:${this.port}`);
 	}
